@@ -1,20 +1,84 @@
+import { useContext, useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppLoading from 'expo-app-loading';
 
-export default function App() {
+import { Colors } from './constants/styles';
+import AuthContextProvider, { AuthContext } from './stores/AuthContext';
+
+import SignInScreen from './screens/SignInScreen';
+import SignUpScreen from './screens/SignUpScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
+
+const Stack = createNativeStackNavigator();
+
+export const App = () => {
+  const [isTryingLogin, setIsTryingLogin] = useState(true);
+  const authCtx = useContext(AuthContext);
+
+  useEffect(() => {
+    async function fetchToken() {
+      const storedToken = await AsyncStorage.getItem('token');
+
+      if (storedToken) {
+        authCtx.authenticate(storedToken);
+      }
+
+      setIsTryingLogin(false);
+    }
+
+    fetchToken();
+  }, []);
+
+  if (isTryingLogin) {
+    return <AppLoading />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="light" />
+      <AuthContextProvider>
+        <NavigationContainer>
+        {!authCtx.isAuthenticated && 
+          <Stack.Navigator screenOptions={{
+            headerStyle: { backgroundColor: Colors.primary500 },
+            headerTintColor: 'white',
+            contentStyle: { backgroundColor: Colors.primary100 },
+          }}
+          >
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+          </Stack.Navigator>
+        }
+        {authCtx.isAuthenticated && 
+          <Stack.Navigator screenOptions={{
+            headerStyle: { backgroundColor: Colors.primary500 },
+            headerTintColor: 'white',
+            contentStyle: { backgroundColor: Colors.primary100 },
+           }}
+           >
+            <Stack.Screen
+              name="Welcome"
+              component={WelcomeScreen}
+              options={{
+                headerRight: ({ tintColor }) => (
+                <IconButton
+                  icon="exit"
+                  color={tintColor}
+                  size={24}
+                  onPress={authCtx.logout}
+                />
+                ),
+              }}
+            />
+        </Stack.Navigator>       
+        }
+        </NavigationContainer>
+      </AuthContextProvider>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
