@@ -16,14 +16,14 @@ const Stack = createNativeStackNavigator();
 
 export const App = () => {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const authCtx = useContext(AuthContext);
+  const { token, isAuthenticated, authenticate } = useContext(AuthContext);
 
   useEffect(() => {
     async function fetchToken() {
       const storedToken = await AsyncStorage.getItem('token');
 
       if (storedToken) {
-        authCtx.authenticate(storedToken);
+        authenticate(storedToken);
       }
 
       setIsTryingLogin(false);
@@ -36,12 +36,13 @@ export const App = () => {
     return <AppLoading />;
   }
 
+  console.log(isAuthenticated);
   return (
     <>
       <StatusBar style="light" />
       <AuthContextProvider>
         <NavigationContainer>
-        {!authCtx.isAuthenticated && 
+        {!isAuthenticated && 
           <Stack.Navigator screenOptions={{
             headerStyle: { backgroundColor: Colors.primary500 },
             headerTintColor: 'white',
@@ -50,9 +51,10 @@ export const App = () => {
           >
             <Stack.Screen name="SignIn" component={SignInScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
           </Stack.Navigator>
         }
-        {authCtx.isAuthenticated && 
+        {isAuthenticated && 
           <Stack.Navigator screenOptions={{
             headerStyle: { backgroundColor: Colors.primary500 },
             headerTintColor: 'white',

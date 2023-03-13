@@ -20,16 +20,18 @@ export const SignInScreen = () => {
     const navigation = useNavigation();
 
     async function loginHandler() {
-        console.log("Log");
         setIsAuthenticating(true);
         try {
-          //await authCtx.login(enteredEmail, enteredPassword);
+          await authCtx.login(enteredEmail, enteredPassword);
           navigation.replace('Welcome');
         } catch (error) {
           Alert.alert(
             'Authentication failed!',
             'Could not log you in. Please check your credentials or try again later!'
           );
+          
+        }
+        finally {
           setIsAuthenticating(false);
         }
       }
@@ -41,7 +43,7 @@ export const SignInScreen = () => {
     return(
         <View style={styles.form}>
             <Input
-                label="Email Address"
+                label="Username"
                 onUpdateValue={setEnteredEmail}
                 value={enteredEmail}
                 keyboardType="email-address"

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { createContext, useEffect, useState } from 'react';
 
 export const AuthContext = createContext({
-  token: '',
+  token: null,
   isAuthenticated: false,
   authenticate: (token) => {},
   logout: () => {},
@@ -16,6 +16,7 @@ function AuthContextProvider({ children }) {
 
   function authenticate(token) {
     setAuthToken(token);
+    console.log(token);
     AsyncStorage.setItem('token', token);
   }
 
@@ -26,7 +27,7 @@ function AuthContextProvider({ children }) {
 
   const login = (username, password) => {
     console.log("Login");
-    axios.post("https://jobs.pslib.cloud/api/v1/login", {username: username, password: password})
+    axios.post("https://localhost:44496/api/v1/Account/login", {username: username, password: password})
     .then(response => {
         authenticate(response.data);
     })
