@@ -3,20 +3,35 @@ import axios from 'axios';
 
 import { createContext, useEffect, useState } from 'react';
 
+const axiosInstance = axios.create();
+axiosInstance.interceptors.response.use(
+  (response) => { console.log(response); return response},
+  (error) => {console.error(error); return Promise.reject(error);}
+);
+
 export const AuthContext = createContext({
   token: null,
-  isAuthenticated: false,
   authenticate: (token) => {},
   logout: () => {},
   login: () => {}
 });
 
-function AuthContextProvider({ children }) {
+const AuthContextProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState();
+
+  useEffect(() => {
+    async function fetchToken() {
+      const storedToken = await AsyncStorage.getItem('token');
+      if (storedToken) {
+        console.log("Token restored");
+        authenticate(storedToken);
+      }
+    }
+    fetchToken();
+  }, []);
 
   function authenticate(token) {
     setAuthToken(token);
-    console.log(token);
     AsyncStorage.setItem('token', token);
   }
 
@@ -25,20 +40,15 @@ function AuthContextProvider({ children }) {
     AsyncStorage.removeItem('token');
   }
 
-  const login = (username, password) => {
-    console.log("Login");
-    axios.post("https://localhost:44496/api/v1/Account/login", {username: username, password: password})
-    .then(response => {
-        authenticate(response.data);
-    })
-    .catch(error => {
-        setAuthToken("");
-    })
+  const login = async (username, password) => {
+    const response = await axios.post(
+      "https://localhost:44496/api/v1/Account/login", 
+      {username: username, password: password});
+    return response.data;
   }
 
   const value = {
     token: authToken,
-    isAuthenticated: !!authToken,
     authenticate: authenticate,
     logout: logout,
     login: login

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppLoading from 'expo-app-loading';
+import IconButton from './components/ui/IconButton';
 
 import { Colors } from './constants/styles';
 import AuthContextProvider, { AuthContext } from './stores/AuthContext';
@@ -15,70 +16,56 @@ import WelcomeScreen from './screens/WelcomeScreen';
 const Stack = createNativeStackNavigator();
 
 export const App = () => {
-  const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const { token, isAuthenticated, authenticate } = useContext(AuthContext);
-
-  useEffect(() => {
-    async function fetchToken() {
-      const storedToken = await AsyncStorage.getItem('token');
-
-      if (storedToken) {
-        authenticate(storedToken);
-      }
-
-      setIsTryingLogin(false);
-    }
-
-    fetchToken();
-  }, []);
-
-  if (isTryingLogin) {
-    return <AppLoading />;
-  }
-
-  console.log(isAuthenticated);
+  const [isTryingLogin, setIsTryingLogin] = useState(false);
   return (
     <>
-      <StatusBar style="light" />
-      <AuthContextProvider>
+    <StatusBar style="light" />
+    <AuthContextProvider>  
+      <Root />
+    </AuthContextProvider>
+    </>
+  );
+}
+
+const Root = () => {
+  const { token, logout } = useContext(AuthContext);
+  return(
+    <>              
         <NavigationContainer>
-        {!isAuthenticated && 
-          <Stack.Navigator screenOptions={{
+          <Stack.Navigator>
+          {token === null
+          ?
+          <Stack.Group screenOptions={{
             headerStyle: { backgroundColor: Colors.primary500 },
             headerTintColor: 'white',
             contentStyle: { backgroundColor: Colors.primary100 },
-          }}
+            }}
+            >
+            <Stack.Screen name="SignIn" component={SignInScreen} options={{title: "Přihlášení"}} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} options={{title: "Registrace"}} />
+          </Stack.Group>
+           : 
+           <Stack.Group screenOptions={{
+            headerStyle: { backgroundColor: Colors.primary500 },
+            headerTintColor: 'white',
+            contentStyle: { backgroundColor: Colors.primary100 },
+            }}
           >
-            <Stack.Screen name="SignIn" component={SignInScreen} />
-            <Stack.Screen name="SignUp" component={SignUpScreen} />
-            <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          </Stack.Navigator>
-        }
-        {isAuthenticated && 
-          <Stack.Navigator screenOptions={{
-            headerStyle: { backgroundColor: Colors.primary500 },
-            headerTintColor: 'white',
-            contentStyle: { backgroundColor: Colors.primary100 },
-           }}
-           >
-            <Stack.Screen
-              name="Welcome"
-              component={WelcomeScreen}
-              options={{
-                headerRight: ({ tintColor }) => (
+            <Stack.Screen name="Welcome" component={WelcomeScreen} options={{
+              headerRight: ({ tintColor }) => (
                 <IconButton
                   icon="exit"
                   color={tintColor}
                   size={24}
-                  onPress={authCtx.logout}
-                />
-                ),
-              }}
+                  onPress={logout}
             />
-        </Stack.Navigator>       
-        }
-        </NavigationContainer>
-      </AuthContextProvider>
+          ),
+        }}
+            />
+          </Stack.Group>
+           }
+          </Stack.Navigator>
+        </NavigationContainer>    
     </>
   );
 }

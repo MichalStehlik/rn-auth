@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Alert, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import LoadingOverlay from '../components/ui/LoadingOverlay';
@@ -17,7 +17,7 @@ export const SignUpScreen = () => {
     const [invalidEmail, setInvalidEmail] = useState(false);
     const [invalidPassword, setInvalidPassword] = useState(false);
     
-    const authCtx = useContext(AuthContext);
+    const {token} = useContext(AuthContext);
     const navigation = useNavigation();
 
     async function registrationHandler() {
@@ -31,21 +31,21 @@ export const SignUpScreen = () => {
     return(
         <View style={styles.form}>
             <Input
-                label="Email Address"
+                label="Email"
                 onUpdateValue={setEnteredEmail}
                 value={enteredEmail}
                 keyboardType="email-address"
                 isInvalid={invalidEmail}
             />
             <Input
-                label="Password"
+                label="Heslo"
                 onUpdateValue={setEnteredPassword}
                 secure
                 value={enteredPassword}
                 isInvalid={invalidPassword}
             />
             <Input
-                label="Password Copy"
+                label="Heslo pro kontrolu"
                 onUpdateValue={setEnteredPasswordCopy}
                 secure
                 value={enteredPasswordCopy}

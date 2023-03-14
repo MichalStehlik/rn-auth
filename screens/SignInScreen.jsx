@@ -1,5 +1,5 @@
-import { useContext, useState } from 'react';
-import { Alert, View, StyleSheet } from 'react-native';
+import { useContext, useState, useEffect } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import LoadingOverlay from '../components/ui/LoadingOverlay';
@@ -8,32 +8,47 @@ import Input from '../components/ui/Input';
 import { Colors } from '../constants/styles';
 
 import { AuthContext } from '../stores/AuthContext';
+//import axios from "axios";
 
 export const SignInScreen = () => {
-    const [enteredEmail, setEnteredEmail] = useState('');
-    const [enteredPassword, setEnteredPassword] = useState('');
+    const [enteredUsername, setEnteredUsername] = useState('soboty@pslib.cz');
+    const [enteredPassword, setEnteredPassword] = useState('Admin_1234');
     const [isAuthenticating, setIsAuthenticating] = useState(false);
-    const [invalidEmail, setInvalidEmail] = useState(false);
+    const [invalidUsername, setInvalidUsername] = useState(false);
     const [invalidPassword, setInvalidPassword] = useState(false);
     
-    const authCtx = useContext(AuthContext);
+    const {token, login, authenticate} = useContext(AuthContext);
     const navigation = useNavigation();
 
-    async function loginHandler() {
+    const loginHandler = async () => {
         setIsAuthenticating(true);
+        /*
+        axios.post("https://localhost:44496/api/v1/Account/login", 
+        {username: enteredUsername, password: enteredPassword})
+        .then(response => {
+          authenticate(response.data.value);
+          if (token) navigation.replace("Welcome");
+        })
+        .catch(error => {
+          setInvalidPassword(true);
+        })
+        .then(()=>{
+          setIsAuthenticating(false);
+        })
+        */
+        
         try {
-          await authCtx.login(enteredEmail, enteredPassword);
-          navigation.replace('Welcome');
+          const fetchedToken = await login(enteredUsername, enteredPassword);
+          console.log(fetchedToken);
+          authenticate(fetchedToken.value);
+          //navigation.replace("Welcome");
         } catch (error) {
-          Alert.alert(
-            'Authentication failed!',
-            'Could not log you in. Please check your credentials or try again later!'
-          );
-          
+          setInvalidPassword(true);   
         }
         finally {
           setIsAuthenticating(false);
         }
+        
       }
 
     if (isAuthenticating) {
@@ -43,14 +58,14 @@ export const SignInScreen = () => {
     return(
         <View style={styles.form}>
             <Input
-                label="Username"
-                onUpdateValue={setEnteredEmail}
-                value={enteredEmail}
+                label="Uživatelské jméno"
+                onUpdateValue={setEnteredUsername}
+                value={enteredUsername}
                 keyboardType="email-address"
-                isInvalid={invalidEmail}
+                isInvalid={invalidUsername}
             />
             <Input
-                label="Password"
+                label="Heslo"
                 onUpdateValue={setEnteredPassword}
                 secure
                 value={enteredPassword}
