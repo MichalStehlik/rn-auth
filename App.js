@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppLoading from 'expo-app-loading';
 import IconButton from './components/ui/IconButton';
 
@@ -11,7 +10,8 @@ import AuthContextProvider, { AuthContext } from './stores/AuthContext';
 
 import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
-import WelcomeScreen from './screens/WelcomeScreen';
+import ListScreen from './screens/ListScreen';
+import DetailScreen from './screens/DetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -51,7 +51,8 @@ const Root = () => {
             contentStyle: { backgroundColor: Colors.primary100 },
             }}
           >
-            <Stack.Screen name="Welcome" component={WelcomeScreen} options={{
+            <Stack.Screen name="List" component={ListScreen} options={{
+              title: "Seznam",
               headerRight: ({ tintColor }) => (
                 <IconButton
                   icon="exit"
@@ -62,6 +63,7 @@ const Root = () => {
           ),
         }}
             />
+            <Stack.Screen name="Detail" component={DetailScreen} options={{title: "Detail"}} />
           </Stack.Group>
            }
           </Stack.Navigator>
